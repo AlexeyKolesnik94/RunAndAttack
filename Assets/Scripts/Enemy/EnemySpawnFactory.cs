@@ -81,6 +81,7 @@ namespace Enemy
             _enemies.Sort((one, two) =>
                 Vector3.Distance(one.transform.position, _player.transform.transform.position)
                     .CompareTo(Vector3.Distance(two.transform.position, _player.transform.position)));
+            
             Transform target = _enemies[0].transform;
             Dir = target.position - _player.transform.position;
         }

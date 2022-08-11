@@ -49,12 +49,6 @@ namespace AmmoScripts
                     
                     _target = _enemies._enemies[0].transform.position;
 
-                    // var position = transform.position;
-                    // position = Vector3.MoveTowards(position,
-                    //     new Vector3(_target.x, position.y, _target.z),
-                    //     _ammoSpeed * Time.deltaTime);
-                    // transform.position = position;
-
                     transform.position += _enemies.Dir * _ammoSpeed * Time.deltaTime;
 
                 }).AddTo(this);

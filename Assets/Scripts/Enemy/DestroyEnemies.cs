@@ -12,11 +12,13 @@ namespace Enemy
         [SerializeField] private int percentBonusesCreate;
 
         private DiContainer _container;
-        
+        private EnemySpawnFactory _enemy;
+
         [Inject]
-        private void Construct(DiContainer container)
+        private void Construct(DiContainer container, EnemySpawnFactory enemySpawnFactory)
         {
             _container = container;
+            _enemy = enemySpawnFactory;
         }
         
         private void Start()
@@ -27,6 +29,7 @@ namespace Enemy
                     Ammo ammo = col.GetComponent<Ammo>();
                     if (!ammo) return;
                     ammo.gameObject.SetActive(false);
+                    _enemy._enemies.Remove(gameObject);
                     CreateBonus(gameObject.transform);
                     Destroy(gameObject);
                 }).AddTo(this);

@@ -1,4 +1,5 @@
 using System;
+using Enemy;
 using Locations;
 using UIGame;
 using UniRx;
@@ -16,6 +17,7 @@ namespace PlayerScripts
 
         private Pool.Pool _pool;
         private Pause _pause;
+        private EnemySpawnFactory _enemySpawnFactory;
 
         private bool isFire;
 

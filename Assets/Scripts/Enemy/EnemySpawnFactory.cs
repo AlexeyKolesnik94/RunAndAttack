@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Common.Infrastructure;
 using Locations;
 using PlayerScripts;
@@ -12,7 +13,6 @@ namespace Enemy
 {
     public class EnemySpawnFactory : MonoBehaviour
     {
-        [SerializeField] private Transform spawnPoint;
         [SerializeField] private GameObject enemyPrefab;
         [SerializeField] private MeshCollider plane;
         [SerializeField] private float spawnRate;
@@ -24,11 +24,15 @@ namespace Enemy
         private CheckLocation _checkLocation;
         private DiContainer _container;
         private Pause _pause;
-        
+        private Transform _player;
+
+        public List<GameObject> _enemies = new List<GameObject>();
+
         [Inject]
         private void Construct(PlayerMove player, DiContainer container, Pause pause)
         {
             _checkLocation = player.GetComponent<CheckLocation>();
+            _player = player.transform;
             _container = container;
             _pause = pause;
         }
@@ -45,9 +49,13 @@ namespace Enemy
         
         private void PlayerInstantiated(PlayerInstantiateEvent pie) =>
             SetupTargetPlayer(pie.PlayerMove);
-        
-        private void SetupTargetPlayer(PlayerMove playerMove) =>
+
+        private void SetupTargetPlayer(PlayerMove playerMove)
+        {
             _checkLocation = playerMove.GetComponent<CheckLocation>();
+            _player = playerMove.transform;
+        }
+            
 
         private void Spawn()
         {
@@ -60,10 +68,11 @@ namespace Enemy
             _z = Random.Range(position.z - Random.Range(0, plane.bounds.extents.z),
                 position.z + Random.Range(0, plane.bounds.extents.z));
             
-            Vector3 pos = new Vector3(_x, spawnPoint.position.y, _z);
+            Vector3 pos = new Vector3(_x, 0, _z);
             
             // we are factory, so this is norm
-            _container.InstantiatePrefab(enemyPrefab, pos, Quaternion.identity, null);
+            GameObject enemy = _container.InstantiatePrefab(enemyPrefab, pos, Quaternion.identity, null);
+            _enemies.Add(enemy);
         }
     }
 }

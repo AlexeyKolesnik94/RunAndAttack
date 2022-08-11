@@ -1,39 +1,62 @@
 using System;
+using Common.Infrastructure;
+using Enemy;
 using Locations;
+using PlayerScripts;
 using Pool;
 using UIGame;
 using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
 using Zenject;
+using Zenject.SpaceFighter;
 
 namespace AmmoScripts
 {
     [RequireComponent(typeof(PoolObject))]
     public class Ammo : MonoBehaviour
     {
-        private float _ammoSpeed = 15f;
+        [SerializeField] private float _ammoSpeed;
 
         private PoolObject _poolObject;
         private Pause _pause;
 
+        private Vector3 _target;
+
+        private EnemySpawnFactory _enemies;
+        private PlayerMove _player;
+
         [Inject]
-        private void Construct(Pause pause)
+        private void Construct(Pause pause, EnemySpawnFactory enemySpawnFactory, PlayerMove playerMove)
         {
             _pause = pause;
+            _enemies = enemySpawnFactory;
+            _player = playerMove;
         }
         
         private void Start()
         {
+            MessageBroker.Default.Receive<PlayerInstantiateEvent>()
+                .Subscribe(PlayerInstantiated).AddTo(this);
+            
             _poolObject = GetComponent<PoolObject>();
             
             this.UpdateAsObservable()
                 .Subscribe(_ =>
                 {
+                    if (_pause.IsPaused.Value || _enemies._enemies.Count == 0) return;
+
+                    _target = _enemies._enemies[0].transform.position;
                     
-                    if (_pause.IsPaused.Value) return;
-                    transform.Translate(Vector3.forward * _ammoSpeed * Time.deltaTime);
+                    _enemies._enemies.Sort((one, two) =>
+                            (int)Vector3.Distance(one.transform.position, _player.transform.position)
+                                .CompareTo(Vector3.Distance(two.transform.position, _player.transform.position)));
                     
+                    var position = transform.position;
+                    position = Vector3.MoveTowards(position,
+                        new Vector3(_target.x, position.y, _target.z),
+                        _ammoSpeed * Time.deltaTime);
+                    transform.position = position;
                 }).AddTo(this);
             
             Observable.Timer(TimeSpan.FromSeconds(5))
@@ -50,5 +73,11 @@ namespace AmmoScripts
                         gameObject.SetActive(false);
                 }).AddTo(this);
         }
+        
+        private void PlayerInstantiated(PlayerInstantiateEvent pie) =>
+            SetupTargetPlayer(pie.PlayerMove);
+
+        private void SetupTargetPlayer(PlayerMove playerMove) =>
+            _player = playerMove;
     }
 }

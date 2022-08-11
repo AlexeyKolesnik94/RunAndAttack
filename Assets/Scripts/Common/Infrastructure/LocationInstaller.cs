@@ -1,6 +1,7 @@
 using Bonuses.Bank;
 using Bonuses.Coins;
 using Bonuses.Diamonds;
+using Enemy;
 using PlayerScripts;
 using Stats.Health;
 using UIGame;
@@ -15,11 +16,15 @@ namespace Common.Infrastructure
         public Transform StartPoint;
         public GameObject PlayerPrefab;
 
+        public EnemySpawnFactory EnemyFactory;
+
         private PlayerMove _player;
         private HealthModel _healthModel;
         
         public override void InstallBindings()
         {
+            EnemyFactoryBind();
+            
             BindPause();
             BindCoinModel();
             BindDiamondModel();
@@ -86,5 +91,12 @@ namespace Common.Infrastructure
                 .Bind<PlayerMove>()
                 .FromInstance(_player);
         }
+
+        private void EnemyFactoryBind()
+        {
+            Container.Bind<EnemySpawnFactory>()
+                .FromInstance(EnemyFactory);
+        }
+
     }
 }

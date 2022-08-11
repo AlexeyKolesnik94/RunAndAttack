@@ -8,7 +8,7 @@ namespace Stats.Health
         
         private readonly float _baseHealthValue;
         private bool _isDead;
-        
+
         private HealthModel()
         {
             _baseHealthValue = Health.Value;

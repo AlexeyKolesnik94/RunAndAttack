@@ -7,6 +7,7 @@ using UIGame;
 using UniRx;
 using UnityEngine;
 using Zenject;
+using Zenject.SpaceFighter;
 using Random = UnityEngine.Random;
 
 namespace Enemy
@@ -24,15 +25,18 @@ namespace Enemy
         private CheckLocation _checkLocation;
         private DiContainer _container;
         private Pause _pause;
-        private Transform _player;
+        private PlayerMove _player;
 
+        [NonSerialized]
+        public Vector3 Dir;
+        
         public List<GameObject> _enemies = new List<GameObject>();
 
         [Inject]
         private void Construct(PlayerMove player, DiContainer container, Pause pause)
         {
             _checkLocation = player.GetComponent<CheckLocation>();
-            _player = player.transform;
+            _player = player;
             _container = container;
             _pause = pause;
         }
@@ -53,7 +57,7 @@ namespace Enemy
         private void SetupTargetPlayer(PlayerMove playerMove)
         {
             _checkLocation = playerMove.GetComponent<CheckLocation>();
-            _player = playerMove.transform;
+            _player = playerMove;
         }
             
 
@@ -73,6 +77,12 @@ namespace Enemy
             // we are factory, so this is norm
             GameObject enemy = _container.InstantiatePrefab(enemyPrefab, pos, Quaternion.identity, null);
             _enemies.Add(enemy);
+
+            _enemies.Sort((one, two) =>
+                Vector3.Distance(one.transform.position, _player.transform.transform.position)
+                    .CompareTo(Vector3.Distance(two.transform.position, _player.transform.position)));
+            Transform target = _enemies[0].transform;
+            Dir = target.position - _player.transform.position;
         }
     }
 }

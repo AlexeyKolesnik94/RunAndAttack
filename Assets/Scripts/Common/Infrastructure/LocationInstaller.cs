@@ -39,6 +39,8 @@ namespace Common.Infrastructure
                 InstantiatePlayer();
                 _healthModel.Resurrect();
             }).AddTo(this);
+            
+            
         }
 
         private void BindPause()

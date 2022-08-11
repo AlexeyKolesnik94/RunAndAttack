@@ -9,7 +9,6 @@ using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
 using Zenject;
-using Zenject.SpaceFighter;
 
 namespace AmmoScripts
 {
@@ -25,7 +24,7 @@ namespace AmmoScripts
 
         private EnemySpawnFactory _enemies;
         private PlayerMove _player;
-
+        
         [Inject]
         private void Construct(Pause pause, EnemySpawnFactory enemySpawnFactory, PlayerMove playerMove)
         {
@@ -34,29 +33,30 @@ namespace AmmoScripts
             _player = playerMove;
         }
         
+
         private void Start()
         {
             MessageBroker.Default.Receive<PlayerInstantiateEvent>()
                 .Subscribe(PlayerInstantiated).AddTo(this);
-            
+
             _poolObject = GetComponent<PoolObject>();
-            
+
+
             this.UpdateAsObservable()
                 .Subscribe(_ =>
                 {
                     if (_pause.IsPaused.Value || _enemies._enemies.Count == 0) return;
-
+                    
                     _target = _enemies._enemies[0].transform.position;
-                    
-                    _enemies._enemies.Sort((one, two) =>
-                            (int)Vector3.Distance(one.transform.position, _player.transform.position)
-                                .CompareTo(Vector3.Distance(two.transform.position, _player.transform.position)));
-                    
-                    var position = transform.position;
-                    position = Vector3.MoveTowards(position,
-                        new Vector3(_target.x, position.y, _target.z),
-                        _ammoSpeed * Time.deltaTime);
-                    transform.position = position;
+
+                    // var position = transform.position;
+                    // position = Vector3.MoveTowards(position,
+                    //     new Vector3(_target.x, position.y, _target.z),
+                    //     _ammoSpeed * Time.deltaTime);
+                    // transform.position = position;
+
+                    transform.position += _enemies.Dir * _ammoSpeed * Time.deltaTime;
+
                 }).AddTo(this);
             
             Observable.Timer(TimeSpan.FromSeconds(5))
@@ -73,7 +73,7 @@ namespace AmmoScripts
                         gameObject.SetActive(false);
                 }).AddTo(this);
         }
-        
+
         private void PlayerInstantiated(PlayerInstantiateEvent pie) =>
             SetupTargetPlayer(pie.PlayerMove);
 

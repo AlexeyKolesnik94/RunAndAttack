@@ -17,10 +17,9 @@ namespace PlayerScripts
 
         private Pool.Pool _pool;
         private Pause _pause;
-        private EnemySpawnFactory _enemySpawnFactory;
 
         private bool isFire;
-
+        
         [Inject]
         private void Construct(Pause pause)
         {
@@ -39,8 +38,10 @@ namespace PlayerScripts
                 .Repeat()
                 .Subscribe(_ =>
                 {
-                    if (_checkLocation.IsEnemyField && !_pause.IsPaused.Value) 
+                    if (_checkLocation.IsEnemyField && !_pause.IsPaused.Value)
+                    {
                         _pool.GetFreeElement(gun.position, transform.rotation);
+                    }
                 }).AddTo(this);
         }
     }
